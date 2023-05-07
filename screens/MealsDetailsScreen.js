@@ -1,5 +1,7 @@
 import { useLayoutEffect } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { addFavorite, removeFavorite } from "../store/redux/favorites";
 
 import { MEALS } from "../data/dummy-data";
 
@@ -9,25 +11,34 @@ import Subtitle from "../components/MealDetail/Subtitle";
 import MealDetails from "../components/MealDetails";
 
 function MealDetailsScreen({ route, navigation }) {
+  const favoriteMealIds = useSelector((state) => state.favoriteMeals.ids);
+  const dispatch = useDispatch();
+
   const mealId = route.params.mealId;
 
   const selectedMeal = MEALS.find((meal) => meal.id === mealId);
 
-  function headerButtonPressHandler() {
-    console.log("headerButtonPressHandler")
+  const isFavorite = favoriteMealIds.includes(mealId);
+
+  function changeFavoriteStatusHandler() {
+    if (isFavorite) {
+      dispatch(removeFavorite(mealId));
+    } else {
+      dispatch(addFavorite(mealId));
+    }
   }
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <IconButton
-          onPress={headerButtonPressHandler}
-          icon="star"
+          icon={isFavorite ? 'star' : 'star-outline'}
+          onPress={changeFavoriteStatusHandler}
           color="white"
         />
       )
     })
-  }, [navigation, headerButtonPressHandler])
+  }, [navigation, changeFavoriteStatusHandler])
 
   return (
     <ScrollView style={styles.rootContainer}>
